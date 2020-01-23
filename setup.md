@@ -16,3 +16,9 @@ coqtop
 
 https://github.com/SatyendraBanjare/software-foundations
 https://github.com/frankYaohua/software-foundations
+
+https://github.com/coq/coq/issues/5716
+
+```bash
+coqc -Q . LF Basics.v
+```
