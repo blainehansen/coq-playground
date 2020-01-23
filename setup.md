@@ -13,3 +13,6 @@ coqc <file>
 # interactive
 coqtop
 ```
+
+https://github.com/SatyendraBanjare/software-foundations
+https://github.com/frankYaohua/software-foundations
