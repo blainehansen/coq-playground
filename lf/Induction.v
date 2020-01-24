@@ -506,9 +506,15 @@ Definition manual_grade_for_plus_comm_informal : option (nat*string) := None.
 Theorem plus_swap : forall n m p : nat,
   n + (m + p) = m + (n + p).
 Proof.
-	intros n m p. rewrite -> plus_comm.
-	assert (H: p + n = n + p). { rewrite -> plus_comm. reflexivity. }
-	rewrite -> H. reflexivity.
+intros n m p.
+	assert (L: n + (m + p) = (n + m) + p).
+	{ rewrite -> plus_assoc. reflexivity. }
+	assert (R: m + (n + p) = (m + n) + p).
+	{ rewrite -> plus_assoc. reflexivity. }
+  rewrite -> L. rewrite -> R.
+  assert (D: n + m = m + n).
+  { rewrite -> plus_comm. reflexivity. }
+  rewrite -> D. reflexivity.
 Qed.
 
 (** Now prove commutativity of multiplication.  (You will probably
@@ -519,7 +525,10 @@ Qed.
 Theorem mult_comm : forall m n : nat,
   m * n = n * m.
 Proof.
-  (* FILL IN HERE *) Admitted.
+	intros m n. induction n as [| n' IHn'].
+	- simpl. rewrite -> mult_0_r. reflexivity.
+	- simpl.
+Qed.
 (** [] *)
 
 (** **** Exercise: 3 stars, standard, optional (more_exercises)  
