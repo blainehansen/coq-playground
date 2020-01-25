@@ -22,3 +22,5 @@ https://github.com/coq/coq/issues/5716
 ```bash
 coqc -Q . LF Basics.v
 ```
+
+https://packagecontrol.io/packages/Coq
