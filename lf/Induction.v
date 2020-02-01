@@ -5,7 +5,7 @@ Print LoadPath.
 (** Before getting started, we need to import all of our
     definitions from the previous chapter: *)
 
-From LF Require Export Basics.
+From lf Require Export Basics.
 
 (** For the [Require Export] to work, Coq needs to be able to
     find a compiled version of [Basics.v], called [Basics.vo], in a directory
@@ -191,7 +191,7 @@ Proof.
     variables, the [induction] tactic will automatically move them
     into the context as needed.) *)
 
-(** **** Exercise: 2 stars, standard, recommended (basic_induction)  
+(** **** Exercise: 2 stars, standard, recommended (basic_induction)
 
     Prove the following using induction. You might need previously
     proven results. *)
@@ -228,9 +228,8 @@ Proof.
   - simpl. reflexivity.
   - simpl. rewrite -> IHn'. reflexivity.
 Qed.
-(** [] *)
 
-(** **** Exercise: 2 stars, standard (double_plus)  
+(** **** Exercise: 2 stars, standard (double_plus)
 
     Consider the following function, which doubles its argument: *)
 
@@ -248,9 +247,8 @@ Proof.
   - simpl. reflexivity.
   - simpl. rewrite -> IHn'. rewrite <- plus_n_Sm. reflexivity.
 Qed.
-(** [] *)
 
-(** **** Exercise: 2 stars, standard, optional (evenb_S)  
+(** **** Exercise: 2 stars, standard, optional (evenb_S)
 
     One inconvenient aspect of our definition of [evenb n] is the
     recursive call on [n - 2]. This makes proofs about [evenb n]
@@ -268,12 +266,11 @@ Proof.
 Qed.
 (** [] *)
 
-(** **** Exercise: 1 star, standard (destruct_induction)  
+(** **** Exercise: 1 star, standard (destruct_induction)
 
     Briefly explain the difference between the tactics [destruct]
     and [induction].
 
-(* FILL IN HERE *)
 *)
 
 (* Do not modify the following line: *)
@@ -470,20 +467,18 @@ Proof.
     whereas the informal proof reminds the reader several times where
     things stand). *)
 
-(** **** Exercise: 2 stars, advanced, recommended (plus_comm_informal)  
+(** **** Exercise: 2 stars, advanced, recommended (plus_comm_informal)
 
     Translate your solution for [plus_comm] into an informal proof:
 
     Theorem: Addition is commutative.
-
-    Proof: (* FILL IN HERE *)
 *)
 
 (* Do not modify the following line: *)
 Definition manual_grade_for_plus_comm_informal : option (nat*string) := None.
 (** [] *)
 
-(** **** Exercise: 2 stars, standard, optional (eqb_refl_informal)  
+(** **** Exercise: 2 stars, standard, optional (eqb_refl_informal)
 
     Write an informal proof of the following theorem, using the
     informal proof of [plus_assoc] as a model.  Don't just
@@ -491,14 +486,12 @@ Definition manual_grade_for_plus_comm_informal : option (nat*string) := None.
 
     Theorem: [true = n =? n] for any [n].
 
-    Proof: (* FILL IN HERE *)
-
     [] *)
 
 (* ################################################################# *)
 (** * More Exercises *)
 
-(** **** Exercise: 3 stars, standard, recommended (mult_comm)  
+(** **** Exercise: 3 stars, standard, recommended (mult_comm)
 
     Use [assert] to help prove this theorem.  You shouldn't need to
     use induction on [plus_swap]. *)
@@ -527,11 +520,10 @@ Theorem mult_comm : forall m n : nat,
 Proof.
 	intros m n. induction n as [| n' IHn'].
 	- simpl. rewrite -> mult_0_r. reflexivity.
-	- simpl.
+	- simpl. rewrite <- IHn'. rewrite -> plus_comm. rewrite <- mult_n_Sm. reflexivity.
 Qed.
-(** [] *)
 
-(** **** Exercise: 3 stars, standard, optional (more_exercises)  
+(** **** Exercise: 3 stars, standard, optional (more_exercises)
 
     Take a piece of paper.  For each of the following theorems, first
     _think_ about whether (a) it can be proved using only
@@ -546,22 +538,43 @@ Check leb.
 Theorem leb_refl : forall n:nat,
   true = (n <=? n).
 Proof.
-  (* FILL IN HERE *) Admitted.
+	intros n. induction n as [| n' IHn'].
+	- reflexivity.
+	- simpl. rewrite <- IHn'. reflexivity.
+Qed.
 
 Theorem zero_nbeq_S : forall n:nat,
   0 =? (S n) = false.
 Proof.
-  (* FILL IN HERE *) Admitted.
+	intros n. destruct n.
+	- reflexivity.
+	- reflexivity.
+Qed.
 
 Theorem andb_false_r : forall b : bool,
   andb b false = false.
 Proof.
-  (* FILL IN HERE *) Admitted.
+	intros b. destruct b.
+	- reflexivity.
+	- reflexivity.
+Qed.
+
+
+(*plus_n_O*)
+(*plus_n_Sm*)
 
 Theorem plus_ble_compat_l : forall n m p : nat,
   n <=? m = true -> (p + n) <=? (p + m) = true.
 Proof.
-  (* FILL IN HERE *) Admitted.
+	intros n m p.
+	assert (P: p + 0 = p). { rewrite -> plus_n_O. reflexivity. }
+	destruct n.
+	- destruct m.
+		+ simpl. rewrite -> P. rewrite <- leb_refl. reflexivity.
+			(* BLAINE *)
+		+ intros H. rewrite -> P.
+	-
+Qed.
 
 Theorem S_nbeq_0 : forall n:nat,
   (S n) =? 0 = false.
@@ -575,8 +588,7 @@ Proof.
 Theorem all3_spec : forall b c : bool,
     orb
       (andb b c)
-      (orb (negb b)
-               (negb c))
+      (orb (negb b) (negb c))
   = true.
 Proof.
   (* FILL IN HERE *) Admitted.
@@ -592,7 +604,7 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 2 stars, standard, optional (eqb_refl)  
+(** **** Exercise: 2 stars, standard, optional (eqb_refl)
 
     Prove the following theorem.  (Putting the [true] on the left-hand
     side of the equality may look odd, but this is how the theorem is
@@ -606,7 +618,7 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 2 stars, standard, optional (plus_swap')  
+(** **** Exercise: 2 stars, standard, optional (plus_swap')
 
     The [replace] tactic allows you to specify a particular subterm to
    rewrite and what you want it rewritten to: [replace (t) with (u)]
@@ -623,7 +635,7 @@ Proof.
   (* FILL IN HERE *) Admitted.
 (** [] *)
 
-(** **** Exercise: 3 stars, standard, recommended (binary_commute)  
+(** **** Exercise: 3 stars, standard, recommended (binary_commute)
 
     Recall the [incr] and [bin_to_nat] functions that you
     wrote for the [binary] exercise in the [Basics] chapter.  Prove
@@ -655,7 +667,7 @@ Proof.
 Definition manual_grade_for_binary_commute : option (nat*string) := None.
 (** [] *)
 
-(** **** Exercise: 5 stars, advanced (binary_inverse)  
+(** **** Exercise: 5 stars, advanced (binary_inverse)
 
     This is a further continuation of the previous exercises about
     binary numbers.  You may find you need to go back and change your
