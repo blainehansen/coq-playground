@@ -5,7 +5,7 @@ Print LoadPath.
 (** Before getting started, we need to import all of our
     definitions from the previous chapter: *)
 
-From lf Require Export Basics.
+From LF Require Export Basics.
 
 (** For the [Require Export] to work, Coq needs to be able to
     find a compiled version of [Basics.v], called [Basics.vo], in a directory
@@ -602,20 +602,26 @@ Qed.
 Theorem mult_plus_distr_r : forall n m p : nat,
   (n + m) * p = (n * p) + (m * p).
 Proof.
-	intros n m p. induction p as [|p' IHp'].
-	- rewrite -> mult_0_r.
-		assert (N: n * 0 = 0). { rewrite -> mult_0_r. reflexivity. }
-		assert (M: m * 0 = 0). { rewrite -> mult_0_r. reflexivity. }
-		rewrite -> N. rewrite -> M. reflexivity.
-	- assert (N: n * S p' = n * p' + n). { rewrite -> mult_n_Sm. reflexivity. }
-		(* BLAINE *)
-		rewrite -> N.
- Qed.
+	intros n m p. induction n as [| n' IHn'].
+	- simpl. reflexivity.
+	- simpl. rewrite -> IHn'. rewrite -> plus_assoc. reflexivity.
+Qed.
+
+Theorem order_indepent_mult : forall m n p : nat, n * p * m = m * n * p.
+Proof.
+  intros m n p. rewrite -> mult_comm. induction m as [|m' IHm'].
+  - simpl. reflexivity.
+  - simpl. rewrite -> mult_plus_distr_r. rewrite -> IHm'. reflexivity.
+Qed.
 
 Theorem mult_assoc : forall n m p : nat,
   n * (m * p) = (n * m) * p.
-Proof.
-  (* FILL IN HERE *) Admitted.
+Proof. Admitted.
+  (*intros m n p.  induction n as [|n' IHn'].
+  - simpl. rewrite <- mult_n_O. simpl. reflexivity.
+  - simpl. rewrite -> mult_comm. rewrite -> mult_n_Sm. rewrite -> mult_plus_distr_r.  rewrite -> mult_plus_distr_r.
+  rewrite -> mult_comm. rewrite -> order_indepent_mult. reflexivity.
+Qed.*)
 (** [] *)
 
 (** **** Exercise: 2 stars, standard, optional (eqb_refl)
