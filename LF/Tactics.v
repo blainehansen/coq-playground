@@ -277,8 +277,8 @@ Example injection_ex3 : forall (X : Type) (x y z : X) (l j : list X),
 	y :: l = x :: j ->
 	x = y.
 Proof.
-	intros X x y z l j h1 h2. injection h1 as h1. injection h2 as h2.
-	symmetry. apply h2.
+	intros X x y z l j h1 h2. injection h1 as xz ylj. injection h2 as yx lj.
+	symmetry. apply yx.
 Qed.
 (** [] *)
 
@@ -422,18 +422,33 @@ Proof.
 		Practice using "in" variants in this proof.  (Hint: use
 		[plus_n_Sm].) *)
 
+
+Theorem equal_remove_S : forall n m,
+	n = m -> S n = S m.
+	intros n m eq.
+	rewrite eq.
+	reflexivity.
+Qed.
+
 Theorem plus_n_n_injective : forall n m,
 	n + n = m + m ->
 	n = m.
 Proof.
 	intros n. induction n as [| n'].
-	- simpl. destruct m.
+	- destruct m.
 		+ reflexivity.
 		+ intros contra. discriminate contra.
-	-
-		(*blaine*)
-	Abort.
-(*Qed.*)
+	- destruct m.
+		+ intros H. inversion H.
+		+ intro H. apply equal_remove_S.
+			apply IHn'.
+			simpl in H.
+			inversion H.
+			rewrite <- plus_n_Sm in H1.
+			rewrite <- plus_n_Sm in H1.
+			inversion H1.
+			reflexivity.
+Qed.
 (** [] *)
 
 (* ################################################################# *)
@@ -590,7 +605,14 @@ Proof.
 Theorem eqb_true : forall n m,
 		n =? m = true -> n = m.
 Proof.
-	(* FILL IN HERE *) Admitted.
+	intros n. induction n as [| n' IHn].
+	- destruct m.
+		+ reflexivity.
+		+ discriminate.
+	- intros m eq. destruct m as [| m'].
+		+ discriminate.
+		+ apply f_equal. apply IHn. apply eq.
+Qed.
 (** [] *)
 
 (** **** Exercise: 2 stars, advanced (eqb_true_informal)
@@ -720,7 +742,13 @@ Theorem nth_error_after_last: forall (n : nat) (X : Type) (l : list X),
 		 length l = n ->
 		 nth_error l n = None.
 Proof.
-	(* FILL IN HERE *) Admitted.
+	intros n X l. generalize dependent n.
+	induction l as [| x l' IHl].
+	- reflexivity.
+	- intros n H. destruct n as [|n'].
+		+ simpl. discriminate.
+		+ simpl. apply IHl. simpl in H. apply S_injective in H. apply H.
+Qed.
 (** [] *)
 
 (* ################################################################# *)
@@ -888,8 +916,9 @@ Proof.
 		Here is an implementation of the [split] function mentioned in
 		chapter [Poly]: *)
 
-Fixpoint split {X Y : Type} (l : list (X*Y))
-							 : (list X) * (list Y) :=
+Fixpoint split
+	{X Y : Type} (l : list (X*Y))
+: (list X) * (list Y) :=
 	match l with
 	| [] => ([], [])
 	| (x, y) :: t =>
@@ -905,7 +934,11 @@ Theorem combine_split : forall X Y (l : list (X * Y)) l1 l2,
 	split l = (l1, l2) ->
 	combine l1 l2 = l.
 Proof.
-	(* FILL IN HERE *) Admitted.
+	intros X Y l. induction l as [| p l'].
+	- intros l1 l2 H. inversion H. reflexivity.
+	- intros l1 l2 H. inversion H. destruct p as [x y]; destruct (split l') as [xs' ys'];
+		inversion H1. simpl. rewrite IHl'. reflexivity. reflexivity.
+Qed.
 (** [] *)
 
 (** The [eqn:] part of the [destruct] tactic is optional: We've chosen
@@ -981,7 +1014,18 @@ Theorem bool_fn_applied_thrice :
 	forall (f : bool -> bool) (b : bool),
 	f (f (f b)) = f b.
 Proof.
-	(* FILL IN HERE *) Admitted.
+	intros f b. destruct (f b) eqn:Hyp_bool.
+	- destruct b .
+		+ rewrite Hyp_bool. apply Hyp_bool.
+		+ destruct (f true) eqn:Hyp_true.
+			{ rewrite Hyp_true. reflexivity. }
+			{ apply Hyp_bool. }
+	- destruct b .
+		+ destruct (f false) eqn:Hyp_false.
+			{ apply Hyp_bool. }
+			{ apply Hyp_false. }
+		+ rewrite Hyp_bool. apply Hyp_bool.
+Qed.
 (** [] *)
 
 (* ################################################################# *)
