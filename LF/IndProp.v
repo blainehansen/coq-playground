@@ -463,8 +463,6 @@ Proof.
 Qed.
 (** [] *)
 
-(*blaine*)
-
 (** **** Exercise: 4 stars, advanced, optional (even'_ev)
 
     In general, there may be multiple ways of defining a
@@ -482,7 +480,17 @@ Inductive even' : nat -> Prop :=
 
 Theorem even'_ev : forall n, even' n <-> even n.
 Proof.
- (* FILL IN HERE *) Admitted.
+	intros n. split.
+	- intros E. induction E.
+		+ apply ev_0.
+		+ apply ev_SS. apply ev_0.
+		+ apply ev_sum.
+		++ apply IHE1. ++ apply IHE2.
+	- intros E. induction E.
+		+ apply even'_0.
+		+ assert (S (S n) = 2 + n) as H. simpl. reflexivity.
+			rewrite -> H. apply even'_sum. apply even'_2. apply IHE.
+Qed.
 (** [] *)
 
 (** **** Exercise: 3 stars, advanced, recommended (ev_ev__ev)
@@ -491,9 +499,12 @@ Proof.
     bit tricky here: *)
 
 Theorem ev_ev__ev : forall n m,
-  even (n+m) -> even n -> even m.
+  even (n + m) -> even n -> even m.
 Proof.
-  (* FILL IN HERE *) Admitted.
+	intros n m Hnm Hn. induction Hn.
+	- simpl in Hnm. apply Hnm.
+	- apply IHHn. simpl in Hnm. apply evSS_ev in Hnm. apply Hnm.
+Qed.
 (** [] *)
 
 (** **** Exercise: 3 stars, standard, optional (ev_plus_plus)
@@ -594,18 +605,18 @@ Inductive next_even : nat -> nat -> Prop :=
     Define an inductive binary relation [total_relation] that holds
     between every pair of natural numbers. *)
 
-(* FILL IN HERE
-
-    [] *)
+Inductive total_relation: nat -> nat -> Prop :=
+  total_relation_any: forall n m, total_relation n m.
 
 (** **** Exercise: 2 stars, standard, optional (empty_relation)
 
     Define an inductive binary relation [empty_relation] (on numbers)
     that never holds. *)
 
-(* FILL IN HERE
+Inductive empty_relation: nat -> nat -> Prop :=
+  empty_relation_all: forall n m, False -> empty_relation n m.
 
-    [] *)
+(*blaine*)
 
 (** From the definition of [le], we can sketch the behaviors of
     [destruct], [inversion], and [induction] on a hypothesis [H]
