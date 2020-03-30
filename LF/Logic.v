@@ -768,8 +768,6 @@ Qed.
 (** We can translate this directly into a straightforward recursive
 		function taking an element and a list and returning a proposition: *)
 
-(*blaine*)
-
 Fixpoint In {A : Type} (x : A) (l : list A) : Prop :=
 	match l with
 	| [] => False
@@ -832,14 +830,48 @@ Lemma In_map_iff :
 		In y (map f l) <->
 		exists x, f x = y /\ In x l.
 Proof.
-	(* FILL IN HERE *) Admitted.
+	intros A B f l y. split.
+	- (* -> *) intros H. induction l as [| x' l' IHl'].
+		+ (* l = [] *)
+			simpl in H. contradiction.
+		+ (* l = x' :: l' *)
+			simpl in H. destruct H as [H1 | H2].
+				exists x'. split.
+					apply H1.
+					simpl. left. reflexivity.
+				apply IHl' in H2. destruct H2 as [x2 H2]. exists x2. split.
+					apply proj1 in H2. apply H2.
+					simpl. right. apply proj2 in H2. apply H2.
+	- (* <- *) intros H. induction l as [| x' l' IHl'].
+		+ (* l = [] *)
+			simpl in H. destruct H as [x' H]. apply proj2 in H. contradiction.
+		+ (* l = x' :: l' *)
+			simpl. simpl in H. destruct H as [x'' H]. inversion H. destruct H1 as [H2 | H3].
+				left. rewrite H2. apply H0.
+				right. apply IHl'. exists x''. split.
+					apply H0.
+					apply H3.
+Qed.
 (** [] *)
 
 (** **** Exercise: 2 stars, standard (In_app_iff)  *)
 Lemma In_app_iff : forall A l l' (a:A),
 	In a (l++l') <-> In a l \/ In a l'.
 Proof.
-	(* FILL IN HERE *) Admitted.
+	intros A l l' a. split.
+	- intros H. induction l.
+		+ simpl. right. simpl in H. apply H.
+		+ simpl. simpl in H. destruct H.
+			left. left. apply H.
+			apply IHl in H. apply or_assoc. right. apply H.
+	- intros H. induction l.
+		+ simpl in H. destruct H. contradiction.
+			simpl. apply H.
+		+ simpl. simpl in H. destruct H as [[Hxa | Hainl] | Hainl'].
+				left. apply Hxa.
+				right. apply IHl. left. apply Hainl.
+				right. apply IHl. right. apply Hainl'.
+Qed.
 (** [] *)
 
 (** **** Exercise: 3 stars, standard, recommended (All)
@@ -854,15 +886,30 @@ Proof.
 		lemma below.  (Of course, your definition should _not_ just
 		restate the left-hand side of [All_In].) *)
 
-Fixpoint All {T : Type} (P : T -> Prop) (l : list T) : Prop
-	(* REPLACE THIS LINE WITH ":= _your_definition_ ." *). Admitted.
+Fixpoint All {T : Type} (P : T -> Prop) (l : list T) : Prop :=
+	match l with
+	| [] => True
+	| x :: l' => P x /\ All P l'
+	end.
 
 Lemma All_In :
 	forall T (P : T -> Prop) (l : list T),
 		(forall x, In x l -> P x) <->
 		All P l.
 Proof.
-	(* FILL IN HERE *) Admitted.
+	intros T P l. split.
+	- intros H. induction l as [| x' l' IHl].
+		+ simpl. reflexivity.
+		+ simpl. split.
+				apply H. simpl. left. reflexivity.
+				apply IHl. intros x Hxinl'. apply H.
+				simpl. right. apply Hxinl'.
+	- intros H. induction l as [| x' l' IHl].
+		+ simpl. intros x F. contradiction.
+		+ simpl. intros x0 H0. destruct H0 as [x'x0 | H1 H2].
+				simpl in H. destruct H as [Hpx' Hallpl']. rewrite x'x0 in Hpx'. apply Hpx'.
+				simpl in H. destruct H as [Hpx' Hallpl']. apply IHl. apply Hallpl'. apply H1.
+Qed.
 (** [] *)
 
 (** **** Exercise: 3 stars, standard (combine_odd_even)
@@ -873,8 +920,8 @@ Proof.
 		equivalent to [Podd n] when [n] is odd and equivalent to [Peven n]
 		otherwise. *)
 
-Definition combine_odd_even (Podd Peven : nat -> Prop) : nat -> Prop
-	(* REPLACE THIS LINE WITH ":= _your_definition_ ." *). Admitted.
+Definition combine_odd_even (Podd Peven : nat -> Prop) : nat -> Prop :=
+	fun (n : nat) => if oddb n then Podd n else Peven n.
 
 (** To test your definition, prove the following facts: *)
 
@@ -1206,7 +1253,12 @@ Definition tr_rev {X} (l : list X) : list X :=
 		case.  Prove that the two definitions are indeed equivalent. *)
 
 Lemma tr_rev_correct : forall X, @tr_rev X = @rev X.
-(* FILL IN HERE *) Admitted.
+Proof.
+	intros X. apply functional_extensionality. intros l. induction l as [| x' l' IHl].
+	- simpl. reflexivity.
+	- simpl. unfold tr_rev in IHl. unfold tr_rev. simpl.
+		unfold rev.
+Admitted.
 (** [] *)
 
 (* ================================================================= *)
@@ -1240,12 +1292,13 @@ Proof.
 Qed.
 
 (** **** Exercise: 3 stars, standard (evenb_double_conv)  *)
-Theorem evenb_double_conv : forall n,
-	exists k, n = if evenb n then double k
-								else S (double k).
+Theorem evenb_double_conv:
+	forall n, exists k, n =
+		if evenb n then double k
+		else S (double k).
 Proof.
 	(* Hint: Use the [evenb_S] lemma from [Induction.v]. *)
-	(* FILL IN HERE *) Admitted.
+Admitted.
 (** [] *)
 
 Theorem even_bool_prop : forall n,
@@ -1403,7 +1456,10 @@ Qed.
 Lemma andb_true_iff : forall b1 b2:bool,
 	b1 && b2 = true <-> b1 = true /\ b2 = true.
 Proof.
-	(* FILL IN HERE *) Admitted.
+	intros b1 b2. split.
+	- destruct b1, b2. auto. auto. auto. auto.
+	- intros [Hb1 Hb2]. rewrite -> Hb1. rewrite -> Hb2. reflexivity.
+Qed.
 
 Lemma orb_true_iff : forall b1 b2,
 	b1 || b2 = true <-> b1 = true \/ b2 = true.
