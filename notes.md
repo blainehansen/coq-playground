@@ -21,8 +21,10 @@ coqc <file>
 coqtop
 ```
 
-https://github.com/SatyendraBanjare/software-foundations
-https://github.com/frankYaohua/software-foundations
+https://github.com/duanjp8617/Software-Foundations/blob/master/lf/IndProp.v
+
+<!-- https://github.com/SatyendraBanjare/software-foundations -->
+<!-- https://github.com/frankYaohua/software-foundations -->
 
 https://github.com/coq/coq/issues/5716
 

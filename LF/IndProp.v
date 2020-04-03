@@ -856,6 +856,20 @@ Theorem subseq_trans : forall (l1 l2 l3 : list nat),
 	subseq l2 l3 ->
 	subseq l1 l3.
 Proof.
+	(*intros. generalize dependent l1. induction H0.
+	- intros. induction H.
+		+ apply empty.
+		+ apply IHsubseq.
+		+
+	-
+
+	induction H12.
+	- intros _. apply empty.
+	- intros H. apply IHsubseq. induction H.
+		+
+		+
+		+
+	-*)
 Admitted.
 (** [] *)
 
@@ -1123,21 +1137,7 @@ Qed.
 
 Lemma reg_exp_of_list_spec : forall T (s1 s2 : list T),
 	s1 =~ reg_exp_of_list s2 <-> s1 = s2.
-Proof.
-	(*intros. split.
-	- intros H.
-		induction H as [
-		| x'
-		| s1' re1 s2' re2 Hmatch1 IH1 Hmatch2 IH2
-		| s1' re1 re2 Hmatch IH | re1 s2' re2 Hmatch IH
-		| re | s1' s2' re Hmatch1 IH1 Hmatch2 IH2
-	].*)
-	(*intros. split.
-	- intros H. inversion H.
-		+ destruct s2. reflexivity. discriminate.
-		+ induction s2 as [| s2']. discriminate.
-*)
-Admitted.
+Proof. Admitted.
 
 (*Inductive exp_match {T} : list T -> reg_exp -> Prop :=
 	| MEmpty: exp_match [] EmptyStr
@@ -1251,33 +1251,74 @@ end.
 Lemma re_not_empty_correct : forall T (re : @reg_exp T),
 	(exists s, s =~ re) <-> re_not_empty re = true.
 Proof.
-	(*intros. split.
-	- intros [x H]. induction H.
-		+ reflexivity.
-		+ reflexivity.
-		+ simpl. apply andb_true_iff. split. assumption. assumption.
-		+ simpl. apply orb_true_iff. left. assumption.
-		+ simpl. apply orb_true_iff. right. assumption.
-		+ reflexivity.
-		+ reflexivity.
-	- intros H. induction re.
-		+ discriminate H.
-		+ exists []. apply MEmpty.
-		+ exists [t]. apply MChar.
-		+ apply MApp.   simpl in H. rewrite -> andb_true_iff in H. destruct H as [Hre1 Hre2].
-			generalize dependent re2. induction re1.
-			++ discriminate Hre1.
-			++ intros re2 H h1. induction re2.
-				+++ simpl.
-				+++
-			++
-			++
-			++
-			++
+	split.
+	-
+		intros.
+		destruct H.
+		induction H as [|x'|s1 re1 s2 re2 Hm1 IH1 Hm2 IH2
+										|s1 re1 re2 Hm IH | re1 s2 re2 Hm IH | re
+										| s1 s2 re Hm1 IH1 Hm2 IH2].
 		+
+			reflexivity.
 		+
-		+*)
-Admitted.
+			reflexivity.
+		+
+			simpl. rewrite IH1. rewrite IH2. reflexivity.
+		+
+			simpl. rewrite IH. reflexivity.
+		+
+			simpl. rewrite IH.
+			destruct (re_not_empty re1).
+			*
+				reflexivity.
+			*
+				reflexivity.
+		+
+			reflexivity.
+		+
+			reflexivity.
+	-
+		intros.
+		induction re as [ | |x'|re1 IH1 re2 IH2|re1 IH1 re2 IH2|re IH].
+		+
+			simpl in H. discriminate.
+		+
+			exists []. apply MEmpty.
+		+
+			exists [x']. apply MChar.
+		+
+			simpl in H.
+			apply andb_true_iff in H.
+			destruct H.
+			apply IH1 in H.
+			apply IH2 in H0.
+			destruct H.
+			destruct H0.
+			exists (x ++ x0).
+			apply MApp.
+			*
+				apply H.
+			*
+				apply H0.
+		+
+			simpl in H. apply orb_true_iff in H.
+			destruct H.
+			*
+				apply IH1 in H.
+				destruct H.
+				exists x.
+				apply MUnionL.
+				apply H.
+			*
+				apply IH2 in H.
+				destruct H.
+				exists x.
+				apply MUnionR.
+				apply H.
+		+
+			exists [].
+			apply MStar0.
+Qed.
 (** [] *)
 
 (* ================================================================= *)
@@ -1575,9 +1616,13 @@ Qed.
 (** **** Exercise: 2 stars, standard, recommended (reflect_iff)  *)
 Theorem reflect_iff : forall P b, reflect P b -> (P <-> b = true).
 Proof.
-	intros P b H. destruct b.
-	- induction H. rewrite H.
-	-
+	intros P b H. split.
+	- induction H.
+		+ intros HP. reflexivity.
+		+ contradiction.
+	- induction H.
+		+ intros. assumption.
+		+ intros. discriminate H0.
 Qed.
 (** [] *)
 
@@ -1629,7 +1674,15 @@ Fixpoint count n l :=
 Theorem eqbP_practice : forall n l,
 	count n l = 0 -> ~(In n l).
 Proof.
-	(* FILL IN HERE *) Admitted.
+	intros n l. induction l as [| m l'].
+	- simpl. intros _ F. apply F.
+	- simpl. destruct (eqbP n m) as [H | H].
+		+ intros C. discriminate C.
+		+ rewrite plus_O_n. unfold not. unfold not in IHl'.
+			intros H' H''. apply IHl'. apply H'. destruct H''.
+			* unfold not in H. symmetry in H0. apply H in H0. contradiction.
+			* apply H0.
+Qed.
 (** [] *)
 
 (** This small example shows how reflection gives us a small gain in
@@ -1662,7 +1715,11 @@ Proof.
 		[nostutter]. *)
 
 Inductive nostutter {X:Type} : list X -> Prop :=
- (* FILL IN HERE *)
+	| nostutter_empty: nostutter []
+	| nostutter_single x: nostutter [x]
+	| nostutter_append x y l:
+		x <> y -> nostutter l -> nostutter (y :: l) ->
+			nostutter (x :: (y :: l))
 .
 (** Make sure each of these tests succeeds, but feel free to change
 		the suggested proof (in comments) if the given one doesn't work
@@ -1675,34 +1732,22 @@ Inductive nostutter {X:Type} : list X -> Prop :=
 		example with more basic tactics.)  *)
 
 Example test_nostutter_1: nostutter [3;1;4;1;5;6].
-(* FILL IN HERE *) Admitted.
-(*
-	Proof. repeat constructor; apply eqb_neq; auto.
-	Qed.
-*)
+Proof. repeat constructor; apply eqb_neq; auto. Qed.
 
 Example test_nostutter_2:  nostutter (@nil nat).
-(* FILL IN HERE *) Admitted.
-(*
-	Proof. repeat constructor; apply eqb_neq; auto.
-	Qed.
-*)
+Proof. repeat constructor; apply eqb_neq; auto. Qed.
 
 Example test_nostutter_3:  nostutter [5].
-(* FILL IN HERE *) Admitted.
-(*
-	Proof. repeat constructor; apply eqb_false; auto. Qed.
-*)
+Proof. apply nostutter_single. Qed.
 
 Example test_nostutter_4:      not (nostutter [3;1;1;4]).
-(* FILL IN HERE *) Admitted.
-(*
 	Proof. intro.
 	repeat match goal with
 		h: nostutter _ |- _ => inversion h; clear h; subst
 	end.
-	contradiction Hneq0; auto. Qed.
-*)
+	unfold not in H2. apply H2. reflexivity.
+Qed.
+
 
 (* Do not modify the following line: *)
 Definition manual_grade_for_nostutter : option (nat*string) := None.
@@ -1739,7 +1784,31 @@ Definition manual_grade_for_nostutter : option (nat*string) := None.
 		to be a merge of two others.  Do this with an inductive relation,
 		not a [Fixpoint].)  *)
 
-(* FILL IN HERE *)
+Inductive iom {X:Type}: list X -> list X -> list X -> Prop :=
+	| iom_empty: iom [] [] []
+	| iom_left x l1 l2 m:
+		iom l1 l2 m ->
+			iom (x :: l1) l2 (x :: m)
+	| iom_right x l1 l2 m:
+		iom l1 l2 m ->
+			iom l1 (x :: l2) (x :: m)
+.
+
+
+Theorem filter_challenge: forall (X:Type) (l1 l2 l: list X) (test: X -> bool),
+	iom l1 l2 l ->
+	filter test l1 = l1 ->
+	filter test l2 = [] ->
+	filter test l = l1.
+Proof.
+(*	intros X l1 l2 l test H.
+	induction H as [| x' l1' l2' l3' Hmatch IH | x' l1' l2' l3' Hmatch IH].
+	- intros. reflexivity.
+	- intros. simpl in H. destruct (test x') as [] eqn:E.
+		+ inversion H. apply (IH H2) in H0. simpl. rewrite E. rewrite H0. rewrite H. reflexivity.
+		+ simpl. rewrite E.
+*)	-
+Admitted.
 
 (* Do not modify the following line: *)
 Definition manual_grade_for_filter_challenge : option (nat*string) := None.
@@ -1849,13 +1918,20 @@ Lemma in_split : forall (X:Type) (x:X) (l:list X),
 	In x l ->
 	exists l1 l2, l = l1 ++ x :: l2.
 Proof.
-	(* FILL IN HERE *) Admitted.
+	intros. induction l as [| x' l'].
+	- simpl in H. destruct H.
+	- simpl in H. destruct H.
+		+ rewrite H. exists []. exists l'. simpl. reflexivity.
+		+ apply IHl' in H. destruct H. destruct H. rewrite H.
+			exists (x' :: x0). exists x1. simpl. reflexivity.
+Qed.
 
 (** Now define a property [repeats] such that [repeats X l] asserts
 		that [l] contains at least one repeated element (of type [X]).  *)
 
 Inductive repeats {X:Type} : list X -> Prop :=
-	(* FILL IN HERE *)
+	| repeats_new x l: In x l -> repeats (x :: l)
+	| repeats_already x l: repeats l -> repeats (x :: l)
 .
 
 (** Now, here's a way to formalize the pigeonhole principle.  Suppose
@@ -1877,8 +1953,19 @@ Theorem pigeonhole_principle: forall (X:Type) (l1  l2:list X),
 	 length l2 < length l1 ->
 	 repeats l1.
 Proof.
-	 intros X l1. induction l1 as [|x l1' IHl1'].
-	(* FILL IN HERE *) Admitted.
+	intros X l1. induction l1 as [|x l1' IHl1'].
+	- intros. induction l2.
+		+ simpl in H1. inversion H1.
+		+ simpl in H1. inversion H1.
+	- intros. unfold excluded_middle in H.
+		destruct (H (In x l1')) as [H' | H''].
+		+ apply repeats_new. apply H'.
+		+ unfold not in H''. apply repeats_already. apply (IHl1' l2).
+			* unfold excluded_middle. apply H.
+			* intros. apply H0. simpl. right. apply H2.
+			* unfold lt in H1. simpl in H1. unfold lt.
+				apply le_S_n in H1.
+Abort.
 
 (* Do not modify the following line: *)
 Definition manual_grade_for_check_repeats : option (nat*string) := None.
