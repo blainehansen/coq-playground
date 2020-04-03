@@ -1953,14 +1953,17 @@ Theorem pigeonhole_principle: forall (X:Type) (l1  l2:list X),
 	 length l2 < length l1 ->
 	 repeats l1.
 Proof.
-	intros X l1. induction l1 as [|x l1' IHl1'].
+	intros X l1. induction l1 as [|x l1' IHl1].
 	- intros. induction l2.
 		+ simpl in H1. inversion H1.
 		+ simpl in H1. inversion H1.
-	- intros. unfold excluded_middle in H.
+	- intros. induction l2 as [| y l2' IHl2].
+		+ simpl in H1. simpl in H0. (*blaine*)
+		+
+		unfold excluded_middle in H.
 		destruct (H (In x l1')) as [H' | H''].
 		+ apply repeats_new. apply H'.
-		+ unfold not in H''. apply repeats_already. apply (IHl1' l2).
+		+ unfold not in H''. apply repeats_already. apply (IHl1 l2).
 			* unfold excluded_middle. apply H.
 			* intros. apply H0. simpl. right. apply H2.
 			* unfold lt in H1. simpl in H1. unfold lt.
