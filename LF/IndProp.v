@@ -1953,7 +1953,7 @@ Theorem pigeonhole_principle: forall (X:Type) (l1  l2:list X),
 	 length l2 < length l1 ->
 	 repeats l1.
 Proof.
-	intros X l1. induction l1 as [|x l1' IHl1].
+(*	intros X l1. induction l1 as [|x l1' IHl1].
 	- intros. induction l2.
 		+ simpl in H1. inversion H1.
 		+ simpl in H1. inversion H1.
@@ -1967,8 +1967,8 @@ Proof.
 			* unfold excluded_middle. apply H.
 			* intros. apply H0. simpl. right. apply H2.
 			* unfold lt in H1. simpl in H1. unfold lt.
-				apply le_S_n in H1.
-Abort.
+				apply le_S_n in H1.*)
+Admitted.
 
 (* Do not modify the following line: *)
 Definition manual_grade_for_check_repeats : option (nat*string) := None.
@@ -2126,7 +2126,7 @@ Proof.
 	intros. split.
 	- intros. inversion H.
 		+ left. apply H2.
-		+ right. apply H1.
+		+ right. apply H2.
 	- intros [ H | H ].
 		+ apply MUnionL. apply H.
 		+ apply MUnionR. apply H.
