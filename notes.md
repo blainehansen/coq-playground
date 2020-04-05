@@ -21,6 +21,9 @@ coqc <file>
 coqtop
 ```
 
+http://adam.chlipala.net/cpdt/cpdt.pdf
+https://www.cambridge.org/us/academic/subjects/computer-science/programming-languages-and-applied-logic/program-logics-certified-compilers
+
 https://github.com/duanjp8617/Software-Foundations/blob/master/lf/IndProp.v
 
 <!-- https://github.com/SatyendraBanjare/software-foundations -->
@@ -33,3 +36,5 @@ coqc -Q . LF Basics.v
 ```
 
 https://packagecontrol.io/packages/Coq
+
+
