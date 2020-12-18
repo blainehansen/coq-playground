@@ -1208,14 +1208,14 @@ Proof. (* FILL IN HERE *) Admitted.
 Example test_forallb_3 : forallb evenb [0;2;4;5] = false.
 Proof. (* FILL IN HERE *) Admitted.
 
-Example test_forallb_4 : forallb (eqb 5) [] = true.
-Proof. (* FILL IN HERE *) Admitted.
+(*Example test_forallb_4 : forallb (eqb 5) [] = true.
+Proof. (* FILL IN HERE *) Admitted.*)
 
 Fixpoint existsb {X : Type} (test : X -> bool) (l : list X) : bool
 	(* REPLACE THIS LINE WITH ":= _your_definition_ ." *). Admitted.
 
-Example test_existsb_1 : existsb (eqb 5) [0;2;3;6] = false.
-Proof. (* FILL IN HERE *) Admitted.
+(*Example test_existsb_1 : existsb (eqb 5) [0;2;3;6] = false.
+Proof. (* FILL IN HERE *) Admitted.*)
 
 Example test_existsb_2 : existsb (andb true) [true;true;false] = true.
 Proof. (* FILL IN HERE *) Admitted.
